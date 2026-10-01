@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Upload, FileText, AlertTriangle, CheckCircle2, X } from "lucide-react";
+import { Upload, FileText, AlertTriangle, CheckCircle2, X, Settings2 } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Textarea, Label, Select } from "@/components/ui/input";
@@ -118,6 +118,13 @@ export default function ImportPage() {
       <PageHeader
         title="Import"
         description="Paste EOD text, or upload a TXT, CSV, XLSX, or JSON backup file."
+        actions={
+          <Link href="/settings#eod-pattern">
+            <Button variant="outline" size="sm">
+              <Settings2 className="h-4 w-4" /> Configure EOD Pattern
+            </Button>
+          </Link>
+        }
       />
 
       {!result ? (
@@ -134,21 +141,24 @@ export default function ImportPage() {
                 className="min-h-[220px] font-mono text-xs"
                 aria-label="EOD text"
               />
-              <div className="flex gap-2">
-                <Button onClick={handleParseText}>
-                  <FileText className="h-4 w-4" /> Preview Import
-                </Button>
-                <Button variant="ghost" onClick={() => setText(SAMPLE)}>
-                  Use sample
-                </Button>
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex gap-2">
+                  <Button onClick={handleParseText}>
+                    <FileText className="h-4 w-4" /> Preview Import
+                  </Button>
+                  <Button variant="ghost" onClick={() => setText(SAMPLE)}>
+                    Use sample
+                  </Button>
+                </div>
+                <Link href="/settings#eod-pattern">
+                  <Button variant="subtle" size="sm">
+                    <Settings2 className="h-4 w-4" />
+                    {settings.eodPattern?.mode === "template"
+                      ? "Custom pattern"
+                      : "Auto-detect"}
+                  </Button>
+                </Link>
               </div>
-              <p className="text-xs text-muted-foreground">
-                Different EOD format?{" "}
-                <Link href="/settings#eod-pattern" className="text-accent underline-offset-4 hover:underline">
-                  Configure your pattern
-                </Link>{" "}
-                in Settings.
-              </p>
             </CardContent>
           </Card>
 
@@ -210,6 +220,13 @@ export default function ImportPage() {
                     {e}
                   </div>
                 ))}
+                <div className="mt-3">
+                  <Link href="/settings#eod-pattern">
+                    <Button variant="outline" size="sm">
+                      <Settings2 className="h-4 w-4" /> Configure EOD Pattern
+                    </Button>
+                  </Link>
+                </div>
               </div>
             )}
 
