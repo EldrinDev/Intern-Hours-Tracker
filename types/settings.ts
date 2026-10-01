@@ -1,3 +1,5 @@
+import type { EodPattern } from "@/lib/parsers/eod-pattern";
+
 export type TimeFormat = "12h" | "24h";
 export type DateFormat = "long" | "short" | "iso";
 export type BreakMode = "none" | "manual" | "auto";
@@ -24,6 +26,9 @@ export interface OJTSettings {
   timeFormat: TimeFormat;
   dateFormat: DateFormat;
   paperSize: PaperSize;
+
+  /** Configurable EOD import header pattern (undefined = built-in default). */
+  eodPattern?: EodPattern;
 
   setupComplete: boolean;
   hasBackedUp: boolean;

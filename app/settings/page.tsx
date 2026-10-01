@@ -14,12 +14,13 @@ import { useSettings } from "@/hooks/use-settings";
 import { useCompany } from "@/hooks/use-company";
 import { saveCompany, saveSettings, clearAllData } from "@/lib/db/repo";
 import { downloadBackup, restoreBackup } from "@/lib/exporters/backup";
+import { EodPatternEditor } from "@/components/settings/eod-pattern-editor";
 import type { DateFormat, PaperSize, TimeFormat, BreakMode } from "@/types/settings";
 
 export default function SettingsPage() {
   const router = useRouter();
   const { toast } = useToast();
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme } = useTheme(); 
   const { settings, loading } = useSettings();
   const { company } = useCompany();
 
@@ -239,6 +240,9 @@ export default function SettingsPage() {
             </div>
           </CardContent>
         </Card>
+
+        {/* EOD import pattern */}
+        <EodPatternEditor />
 
         {/* Data management */}
         <Card id="data" className="border-border">

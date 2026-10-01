@@ -16,6 +16,7 @@ export const NAV_ITEMS: NavItem[] = [
   { href: "/dtr", label: "DTR", icon: "dtr", group: "main" },
   { href: "/settings#company", label: "Company", icon: "company", group: "config" },
   { href: "/settings", label: "Settings", icon: "settings", group: "config" },
+  { href: "/settings#eod-pattern", label: "EOD Pattern", icon: "import", group: "config" },
   { href: "/settings#data", label: "Data Backup", icon: "export", group: "config" },
   { href: "/about", label: "About", icon: "about", group: "meta" },
 ];

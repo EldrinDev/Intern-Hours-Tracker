@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Upload, FileText, AlertTriangle, CheckCircle2, X } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
@@ -58,7 +59,12 @@ export default function ImportPage() {
       toast("Paste some EOD text first.", "error");
       return;
     }
-    runPreview(parseEODText(text, settings.defaultBreakMinutes));
+    runPreview(
+      parseEODText(text, {
+        defaultBreakMinutes: settings.defaultBreakMinutes,
+        pattern: settings.eodPattern,
+      })
+    );
   };
 
   const handleFile = async (file: File) => {
@@ -75,7 +81,12 @@ export default function ImportPage() {
       } else if (name.endsWith(".xlsx") || name.endsWith(".xls")) {
         runPreview(await parseExcel(file));
       } else {
-        runPreview(parseEODText(await file.text(), settings.defaultBreakMinutes));
+        runPreview(
+          parseEODText(await file.text(), {
+            defaultBreakMinutes: settings.defaultBreakMinutes,
+            pattern: settings.eodPattern,
+          })
+        );
       }
     } catch (err) {
       toast(err instanceof Error ? err.message : "Failed to read file.", "error");
@@ -131,6 +142,13 @@ export default function ImportPage() {
                   Use sample
                 </Button>
               </div>
+              <p className="text-xs text-muted-foreground">
+                Different EOD format?{" "}
+                <Link href="/settings#eod-pattern" className="text-accent underline-offset-4 hover:underline">
+                  Configure your pattern
+                </Link>{" "}
+                in Settings.
+              </p>
             </CardContent>
           </Card>
 
