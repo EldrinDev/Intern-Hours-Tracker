@@ -253,6 +253,7 @@ export default function ImportPage() {
                     <th className="px-3 py-2 font-medium">Day</th>
                     <th className="px-3 py-2 font-medium">Date</th>
                     <th className="px-3 py-2 font-medium">In → Out</th>
+                    <th className="px-3 py-2 font-medium">Schedule</th>
                     <th className="px-3 py-2 font-medium">Status</th>
                   </tr>
                 </thead>
@@ -266,6 +267,19 @@ export default function ImportPage() {
                       <td className="whitespace-nowrap px-3 py-2 font-mono text-xs">
                         {row.timeIn ? formatTime(row.timeIn) : "—"} →{" "}
                         {row.timeOut ? formatTime(row.timeOut) : "—"}
+                      </td>
+                      <td className="px-3 py-2">
+                        {row.timeOut && row.timeOut > (settings.dutyEndTime ?? "19:00") ? (
+                          <Badge tone="accent" title={`Expected clock-out: ${formatTime(settings.dutyEndTime ?? "19:00", settings.timeFormat)}`}>
+                            Overtime
+                          </Badge>
+                        ) : row.timeOut && row.timeOut < (settings.dutyEndTime ?? "19:00") ? (
+                          <Badge tone="destructive" title={`Expected clock-out: ${formatTime(settings.dutyEndTime ?? "19:00", settings.timeFormat)}`}>
+                            Undertime
+                          </Badge>
+                        ) : (
+                          <span className="text-xs text-muted-foreground">—</span>
+                        )}
                       </td>
                       <td className="px-3 py-2">
                         {!row.valid ? (

@@ -29,4 +29,7 @@ export const setupSchema = z.object({
   requiredHours: z.number().positive("Required hours must be greater than 0"),
   companyName: z.string().min(1, "Company name is required"),
   startDate: z.string().optional(),
+  dutyStartTime: z.string().regex(timeRegex, "Duty start time must be valid"),
+  dutyEndTime: z.string().regex(timeRegex, "Duty end time must be valid"),
+  defaultBreakMinutes: z.number().int().min(0, "Break cannot be negative"),
 });

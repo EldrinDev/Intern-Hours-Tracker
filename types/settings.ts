@@ -22,6 +22,8 @@ export interface OJTSettings {
 
   defaultBreakMinutes: number;
   breakMode: BreakMode;
+  dutyStartTime: string;
+  dutyEndTime: string;
 
   timeFormat: TimeFormat;
   dateFormat: DateFormat;
@@ -41,6 +43,8 @@ export const defaultSettings: OJTSettings = {
   requiredMinutes: 486 * 60,
   defaultBreakMinutes: 60,
   breakMode: "manual",
+  dutyStartTime: "10:00",
+  dutyEndTime: "19:00",
   timeFormat: "12h",
   dateFormat: "long",
   paperSize: "a4",

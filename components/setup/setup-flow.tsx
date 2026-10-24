@@ -20,12 +20,23 @@ export function SetupFlow() {
   const [companyName, setCompanyName] = useState("");
   const [position, setPosition] = useState("");
   const [startDate, setStartDate] = useState(todayIso());
+  const [dutyStartTime, setDutyStartTime] = useState("10:00");
+  const [dutyEndTime, setDutyEndTime] = useState("19:00");
+  const [defaultBreakMinutes, setDefaultBreakMinutes] = useState("60");
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
 
   const submit = async () => {
     const hours = Number.parseFloat(requiredHours);
-    const parsed = setupSchema.safeParse({ requiredHours: hours, companyName, startDate });
+    const breakMinutes = Number.parseInt(defaultBreakMinutes, 10);
+    const parsed = setupSchema.safeParse({
+      requiredHours: hours,
+      companyName,
+      startDate,
+      dutyStartTime,
+      dutyEndTime,
+      defaultBreakMinutes: breakMinutes,
+    });
     if (!parsed.success) {
       const fe: Record<string, string> = {};
       for (const issue of parsed.error.issues) fe[String(issue.path[0])] = issue.message;
@@ -45,6 +56,9 @@ export function SetupFlow() {
         requiredMinutes: Math.round(hours * 60),
         companyId: company.id,
         startDate,
+        dutyStartTime,
+        dutyEndTime,
+        defaultBreakMinutes: breakMinutes,
         setupComplete: true,
       });
       toast("Setup complete. You're ready to track.", "success");
@@ -138,6 +152,56 @@ export function SetupFlow() {
             onChange={(e) => setStartDate(e.target.value)}
             className="mt-1.5"
           />
+        </div>
+
+        <div>
+          <h3 className="text-sm font-semibold">Normal Duty Schedule</h3>
+          <p className="mt-1 text-xs text-muted-foreground">
+            Overtime and undertime in import review are based on your expected clock-out. The default
+            one-hour break is deducted from daily duty hours.
+          </p>
+          <div className="mt-3 grid grid-cols-3 gap-3">
+            <div>
+              <Label htmlFor="duty-start">Duty starts</Label>
+              <Input
+                id="duty-start"
+                type="time"
+                value={dutyStartTime}
+                onChange={(e) => setDutyStartTime(e.target.value)}
+                className="mt-1.5"
+              />
+              {errors.dutyStartTime && (
+                <p className="mt-1 text-xs text-destructive">{errors.dutyStartTime}</p>
+              )}
+            </div>
+            <div>
+              <Label htmlFor="duty-end">Duty ends</Label>
+              <Input
+                id="duty-end"
+                type="time"
+                value={dutyEndTime}
+                onChange={(e) => setDutyEndTime(e.target.value)}
+                className="mt-1.5"
+              />
+              {errors.dutyEndTime && (
+                <p className="mt-1 text-xs text-destructive">{errors.dutyEndTime}</p>
+              )}
+            </div>
+            <div>
+              <Label htmlFor="duty-break">Break (minutes)</Label>
+              <Input
+                id="duty-break"
+                type="number"
+                min={0}
+                value={defaultBreakMinutes}
+                onChange={(e) => setDefaultBreakMinutes(e.target.value)}
+                className="mt-1.5"
+              />
+              {errors.defaultBreakMinutes && (
+                <p className="mt-1 text-xs text-destructive">{errors.defaultBreakMinutes}</p>
+              )}
+            </div>
+          </div>
         </div>
 
         <Button className="w-full" onClick={submit} disabled={saving}>

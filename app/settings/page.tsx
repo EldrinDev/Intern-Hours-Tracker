@@ -41,6 +41,8 @@ export default function SettingsPage() {
   const [startDate, setStartDate] = useState("");
   const [expectedEndDate, setExpectedEndDate] = useState("");
   const [defaultBreak, setDefaultBreak] = useState("0");
+  const [dutyStartTime, setDutyStartTime] = useState("10:00");
+  const [dutyEndTime, setDutyEndTime] = useState("19:00");
   const [breakMode, setBreakMode] = useState<BreakMode>("manual");
   const [timeFormat, setTimeFormat] = useState<TimeFormat>("12h");
   const [dateFormat, setDateFormat] = useState<DateFormat>("long");
@@ -60,6 +62,8 @@ export default function SettingsPage() {
     setStartDate(settings.startDate ?? "");
     setExpectedEndDate(settings.expectedEndDate ?? "");
     setDefaultBreak(String(settings.defaultBreakMinutes));
+    setDutyStartTime(settings.dutyStartTime ?? "10:00");
+    setDutyEndTime(settings.dutyEndTime ?? "19:00");
     setBreakMode(settings.breakMode);
     setTimeFormat(settings.timeFormat);
     setDateFormat(settings.dateFormat);
@@ -104,6 +108,8 @@ export default function SettingsPage() {
         startDate: startDate || undefined,
         expectedEndDate: expectedEndDate || undefined,
         defaultBreakMinutes: Number.parseInt(defaultBreak, 10) || 0,
+        dutyStartTime,
+        dutyEndTime,
         breakMode,
         timeFormat,
         dateFormat,
@@ -190,6 +196,17 @@ export default function SettingsPage() {
             <div>
               <Label htmlFor="brk">Default Break (minutes)</Label>
               <Input id="brk" type="number" min={0} value={defaultBreak} onChange={(e) => setDefaultBreak(e.target.value)} className="mt-1.5" />
+            </div>
+            <div>
+              <Label htmlFor="duty-start">Normal Duty Start</Label>
+              <Input id="duty-start" type="time" value={dutyStartTime} onChange={(e) => setDutyStartTime(e.target.value)} className="mt-1.5" />
+            </div>
+            <div>
+              <Label htmlFor="duty-end">Normal Duty End</Label>
+              <Input id="duty-end" type="time" value={dutyEndTime} onChange={(e) => setDutyEndTime(e.target.value)} className="mt-1.5" />
+              <p className="mt-1 text-xs text-muted-foreground">
+                Import review compares clock-out with this time. Break is deducted from rendered hours.
+              </p>
             </div>
             <div>
               <Label htmlFor="start">OJT Start Date</Label>
