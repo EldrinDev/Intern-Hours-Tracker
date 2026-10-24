@@ -2,16 +2,28 @@
 
 import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Search, PlusCircle, ArrowUpDown, Table2, GanttChartSquare, ListChecks } from "lucide-react";
+import {
+  Search,
+  PlusCircle,
+  Upload,
+  Trash2,
+  ArrowUpDown,
+  Table2,
+  GanttChartSquare,
+  ListChecks,
+} from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { Button } from "@/components/ui/button";
 import { Input, Select } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
+import { ConfirmDialog } from "@/components/ui/dialog";
 import { EmptyState } from "@/components/ui/empty";
 import { RecordActions } from "@/components/records/record-actions";
 import { Timeline } from "@/components/records/timeline";
 import { useRecords } from "@/hooks/use-records";
 import { useSettings } from "@/hooks/use-settings";
+import { useToast } from "@/components/ui/toast";
+import { deleteRecords } from "@/lib/db/repo";
 import { formatDate, formatTime } from "@/lib/formatters/date";
 import { formatDuration } from "@/lib/formatters/duration";
 import { sortByDayDate } from "@/lib/calculations/hours";
@@ -22,10 +34,13 @@ type SortDir = "asc" | "desc";
 export default function RecordsPage() {
   const { records, loading } = useRecords();
   const { settings } = useSettings();
+  const { toast } = useToast();
   const [query, setQuery] = useState("");
   const [month, setMonth] = useState("all");
   const [dir, setDir] = useState<SortDir>("asc");
   const [view, setView] = useState<View>("table");
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(() => new Set());
+  const [confirmDeleteOpen, setConfirmDeleteOpen] = useState(false);
 
   const months = useMemo(() => {
     const set = new Set<string>();
@@ -50,6 +65,40 @@ export default function RecordsPage() {
     return list;
   }, [records, query, month, dir]);
 
+  const selectedCount = records.filter((record) => selectedIds.has(record.id)).length;
+  const allFilteredSelected =
+    filtered.length > 0 && filtered.every((record) => selectedIds.has(record.id));
+
+  const toggleRecord = (id: string) => {
+    setSelectedIds((current) => {
+      const next = new Set(current);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
+
+  const toggleFilteredRecords = (checked: boolean) => {
+    setSelectedIds((current) => {
+      const next = new Set(current);
+      for (const record of filtered) {
+        if (checked) next.add(record.id);
+        else next.delete(record.id);
+      }
+      return next;
+    });
+  };
+
+  const handleDeleteSelected = async () => {
+    try {
+      const count = await deleteRecords(Array.from(selectedIds));
+      setSelectedIds(new Set());
+      toast(`${count} record${count === 1 ? "" : "s"} deleted.`, "success");
+    } catch (error) {
+      toast(error instanceof Error ? error.message : "Failed to delete records.", "error");
+    }
+  };
+
   if (loading) return <div className="text-sm text-muted-foreground">Loading records...</div>;
 
   return (
@@ -58,11 +107,18 @@ export default function RecordsPage() {
         title="Records"
         description={`${records.length} record${records.length === 1 ? "" : "s"}`}
         actions={
-          <Link href="/records/new">
-            <Button>
-              <PlusCircle className="h-4 w-4" /> Add Record
-            </Button>
-          </Link>
+          <div className="flex gap-2">
+            <Link href="/import">
+              <Button variant="outline">
+                <Upload className="h-4 w-4" /> Import
+              </Button>
+            </Link>
+            <Link href="/records/new">
+              <Button>
+                <PlusCircle className="h-4 w-4" /> Add Record
+              </Button>
+            </Link>
+          </div>
         }
       />
 
@@ -129,6 +185,21 @@ export default function RecordsPage() {
             </div>
           </div>
 
+          {selectedCount > 0 && (
+            <div className="mb-4 flex items-center gap-3">
+              <span className="text-sm text-muted-foreground">
+                {selectedCount} selected
+              </span>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setConfirmDeleteOpen(true)}
+              >
+                <Trash2 className="h-4 w-4" /> Delete selected
+              </Button>
+            </div>
+          )}
+
           {filtered.length === 0 ? (
             <EmptyState title="No matching records" description="Try a different search or filter." />
           ) : view === "timeline" ? (
@@ -141,6 +212,15 @@ export default function RecordsPage() {
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-border bg-muted/50 text-left text-xs uppercase tracking-wide text-muted-foreground">
+                      <th className="px-4 py-3 font-medium">
+                        <input
+                          type="checkbox"
+                          checked={allFilteredSelected}
+                          onChange={(event) => toggleFilteredRecords(event.target.checked)}
+                          aria-label="Select all filtered records"
+                          className="h-4 w-4 accent-primary"
+                        />
+                      </th>
                       <th className="px-4 py-3 font-medium">Day</th>
                       <th className="px-4 py-3 font-medium">Date</th>
                       <th className="px-4 py-3 font-medium">Time In</th>
@@ -157,6 +237,15 @@ export default function RecordsPage() {
                         key={r.id}
                         className="border-b border-border transition-colors last:border-0 hover:bg-accent/5"
                       >
+                        <td className="px-4 py-3">
+                          <input
+                            type="checkbox"
+                            checked={selectedIds.has(r.id)}
+                            onChange={() => toggleRecord(r.id)}
+                            aria-label={`Select Day ${r.day}`}
+                            className="h-4 w-4 accent-primary"
+                          />
+                        </td>
                         <td className="px-4 py-3 font-medium">
                           <Link href={`/records/${r.id}`} className="hover:text-accent">
                             {r.day}
@@ -180,6 +269,15 @@ export default function RecordsPage() {
           )}
         </>
       )}
+      <ConfirmDialog
+        open={confirmDeleteOpen}
+        onClose={() => setConfirmDeleteOpen(false)}
+        onConfirm={handleDeleteSelected}
+        title={`Delete ${selectedCount} selected record${selectedCount === 1 ? "" : "s"}?`}
+        description="This will permanently remove the selected records from this browser."
+        confirmLabel="Delete"
+        destructive
+      />
     </>
   );
 }

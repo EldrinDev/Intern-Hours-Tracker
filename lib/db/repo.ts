@@ -126,6 +126,15 @@ export async function deleteRecord(id: string): Promise<void> {
   await persistSeries(existing.filter((r) => r.id !== id));
 }
 
+export async function deleteRecords(ids: string[]): Promise<number> {
+  const idsToDelete = new Set(ids);
+  const existing = await getRecords();
+  const remaining = existing.filter((record) => !idsToDelete.has(record.id));
+  const deletedCount = existing.length - remaining.length;
+  if (deletedCount > 0) await persistSeries(remaining);
+  return deletedCount;
+}
+
 export async function duplicateRecord(id: string): Promise<DailyRecord | undefined> {
   const existing = await getRecords();
   const src = existing.find((r) => r.id === id);

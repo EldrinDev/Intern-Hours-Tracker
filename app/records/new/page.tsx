@@ -1,8 +1,11 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Upload } from "lucide-react";
 import { PageHeader } from "@/components/layout/page-header";
 import { RecordForm } from "@/components/records/record-form";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/toast";
 import { useRecords } from "@/hooks/use-records";
 import { useSettings } from "@/hooks/use-settings";
@@ -25,7 +28,17 @@ export default function NewRecordPage() {
 
   return (
     <div className="mx-auto max-w-2xl">
-      <PageHeader title="Add Daily Record" description="Time in and out calculate rendered hours automatically." />
+      <PageHeader
+        title="Add Daily Record"
+        description="Time in and out calculate rendered hours automatically."
+        actions={
+          <Link href="/import">
+            <Button variant="outline">
+              <Upload className="h-4 w-4" /> Import
+            </Button>
+          </Link>
+        }
+      />
       <RecordForm
         suggestedDay={nextDay}
         defaultBreakMinutes={settings.defaultBreakMinutes}
